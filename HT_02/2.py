@@ -7,6 +7,8 @@
         Expected Output: [(10, 20, "100"), (40, 50, 60, "100"), (80, "100"), ("100",)]
 '''
 import random
+
+
 first_words_the_zen_of_python = [
         1, 'Beautiful',
         2, 'Explicit',
@@ -29,12 +31,12 @@ first_words_the_zen_of_python = [
         19, 'Namespaces'
 ]
 number_from_1_to_5 = random.randrange(1, 5)
-print(number_from_1_to_5)
+print('кількість кортежів у списку', number_from_1_to_5)
 list_of_tuples = []
 for _ in range(number_from_1_to_5):
     list_of_tuples.append(tuple(random.choices(first_words_the_zen_of_python, k = random.randrange(1, 5))))
-print("список кортежів", (list_of_tuples))
-value = input()
+print('список кортежів', (list_of_tuples))
+value = input('Enter the value that will replace the last element of the tuple: ')
 last_list = [] # кінцевий список в якому будуть змінені кортежі
 for i in list_of_tuples:
     lst = list(i)

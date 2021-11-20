@@ -28,7 +28,7 @@ first_words_the_zen_of_python = [
         18, 'If',
         19, 'Namespaces'
 ]
-n = int(input(f'enter the number of items in the list, but not more than {len(first_words_the_zen_of_python)}: '))
+n = random.randrange(1, 38)
 lst = random.sample(first_words_the_zen_of_python, n)
 for i in lst:
     string += str(i)
