@@ -12,11 +12,9 @@ b = int(input('enter a number: '))
 
 def comparison_of_numbers(x, y):
     if x > y:
-        z = x - y
-        return f'{x} бiльше нiж {у} на {z}'
+        return f'{x} бiльше нiж {y} на {x - y}'
     elif x < y:
-        z = y - x
-        return f'{y} бiльше нiж {х} на {z}' # NameError: name 'х' is not defined  я хз
+        return f'{y} бiльше нiж {x} на {y - x}'
     else:
         return f'{x} дорiвнює {y}'
 
