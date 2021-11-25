@@ -9,7 +9,10 @@ def calculator(num_1, num_2, operation):
     elif operation == '*':
         return f'{num_1 * num_2}'
     elif operation == '/':
-        return f'{num_1 / num_2}'
+        if num_2 != 0:
+            return f'{num_1 / num_2}'
+        else:
+            return f'cannot be divisible by zero'
     else:
         return 'operation not found'
 
