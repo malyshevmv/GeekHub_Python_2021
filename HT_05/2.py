@@ -23,19 +23,16 @@ def login_and_password_validation(username, password):
                 return True
         return False
 
-    if 3 <= len(username) <= 50:
-        if len(password) >= 8:
-            if has_numbers(password):
-                if symbol_from_the_list(symbols, password):
-                    return True
-                else:
-                    raise LoginException('the password must have at least one of the characters [!, @, $, %, ^, &, *, (, ), _, -, +]')
-            else:
-                raise LoginException('the password must have at least one digit')
-        else:
-            raise LoginException('password must be at least 8 characters long')
-    else:
+    if  50 >= len(username) <= 3:
         raise LoginException('the name must be at least 3 characters and at most 50')
+    elif len(password) < 8:
+        raise LoginException('password must be at least 8 characters long')
+    elif not has_numbers(password):
+        raise LoginException('the password must have at least one digit')
+    elif not symbol_from_the_list(symbols, password):
+        raise LoginException('the password must have at least one of the characters [!, @, $, %, ^, &, *, (, ), _, -, +]')
+    else:
+        return True
 
+print(login_and_password_validation('qwerty', '1qazttt!'))
 
-print(login_and_password_validation('qwerty', '1qaztttdc!'))
