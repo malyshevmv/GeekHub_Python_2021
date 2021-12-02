@@ -23,7 +23,7 @@ def login_and_password_validation(username, password):
                 return True
         return False
 
-    if  50 >= len(username) <= 3:
+    if  50 <= len(username) or len(username) <= 3:
         raise LoginException('the name must be at least 3 characters and at most 50')
     elif len(password) < 8:
         raise LoginException('password must be at least 8 characters long')

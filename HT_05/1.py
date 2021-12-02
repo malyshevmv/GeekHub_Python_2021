@@ -13,11 +13,17 @@ class LoginException(Exception):
 def login_and_password_verification(username, password, silent = False):
     lst_user = [['user1', 'qwerty'], ['user2', '1111'], ['user3', '0000'], ['user4', '1234'], ['user5', '4321']]
     for user in lst_user:
-        if user[0] == username and user[1] == password:
-            return True
-        elif silent == True:
-            return False
-        else:
-            raise LoginException('incorrect data entered')
+        if user[0] == username:
+            if user[1] == password:
+                return True
+            elif user[1] != password and silent == True:
+                return False
+            elif user[1] != password and silent == False:
+                raise LoginException('incorrect data entered')
+    if silent == True:
+        return False
+    elif silent == False:
+        raise LoginException('incorrect data entered')
 
-print(login_and_password_verification('user1', 'qwerty'))
+
+print(login_and_password_verification('user30', '0000'))
