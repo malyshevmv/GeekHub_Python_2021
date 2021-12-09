@@ -64,6 +64,8 @@ def i_deduce_the_balance():
 def i_replenish_the_balance():
     #print(f'я поповнюю баланс коистувача {USER_ONLINE}')
     plus_to_balance = int(input('How much do you want to top up your balance? '))
+    if plus_to_balance < 0:
+      return 'You entered an incorrect data'
     with open(f'{USER_ONLINE}_balance.data') as balance:
         b = balance.read()
     with open(f'{USER_ONLINE}_balance.data', 'w') as balance:
@@ -71,19 +73,23 @@ def i_replenish_the_balance():
     with open(f'{USER_ONLINE}_balance.data') as balance, open(f'{USER_ONLINE}_transactions.data', 'a') as transactions:
         b = balance.read()
         transactions.write(json.dumps(b))
+        transactions.write('\n')
     print('----------')
 
 def i_take_off_the_balance():
     #print(f'я знімаю з балансу користувача {USER_ONLINE}')
-    minus_to_balance = int(input('How much do you want to top up your balance? '))
+    minus_to_balance = int(input('What amount do you want to withdraw? '))
     with open(f'{USER_ONLINE}_balance.data') as balance:
         b = balance.read()
+    if minus_to_balance < 0:
+      return 'You entered an incorrect data'
     if int(b) >= minus_to_balance:
         with open(f'{USER_ONLINE}_balance.data', 'w') as balance:
             balance.write(str(int(b) - minus_to_balance))
         with open(f'{USER_ONLINE}_balance.data') as balance, open(f'{USER_ONLINE}_transactions.data', 'a') as transactions:
             b = balance.read()
             transactions.write(json.dumps(b))
+            transactions.write('\n')
         print('The operation was successful')
     else:
         print('Not enough funds on the balance')

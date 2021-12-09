@@ -35,9 +35,8 @@ def function(file, number_of_characters):
             center = data_f[number_of_characters + kilkist_probiliv:number_of_characters + kilkist_probiliv + number_of_characters]
             return f'{data_f[:number_of_characters]}{" "*kilkist_probiliv}{center}{" "*kilkist_probiliv}{data_f[-number_of_characters:]}'
         elif len(data_f) % 2 == 0 and number_of_characters % 2 != 0:
-            data_f = data_f[:-1]
             kilkist_probiliv = (len(data_f) - 3*number_of_characters) // 2
             center = data_f[number_of_characters + kilkist_probiliv:number_of_characters + kilkist_probiliv + number_of_characters]
             return f'{data_f[:number_of_characters]}{" "*kilkist_probiliv}{center}{" "*kilkist_probiliv}{data_f[-number_of_characters:]}'
 
-print(function('test0.txt', 3))
+print(function('test0.txt', 2))
