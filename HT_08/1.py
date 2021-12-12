@@ -149,16 +149,9 @@ def change_the_number_of_banknotes_in_the_ATM_after_the_user(summa, json_znachen
             sum_bankomat += int(key) * value
     if sum_bankomat >= the_amount_you_want_to_withdraw:
         dct_seized_banknotes = {}
-        while the_amount_you_want_to_withdraw >= 10:
+        while the_amount_you_want_to_withdraw != 0:
             for key, value in dct_znachen.items():
                 if value >= 1:
-                    while the_amount_you_want_to_withdraw > int(key):
-                        the_amount_you_want_to_withdraw -= int(key)
-                        dct_znachen[key] = value - 1
-                        if key in dct_seized_banknotes:
-                            dct_seized_banknotes[key] += 1
-                        else:
-                            dct_seized_banknotes[key] = 1
                     if the_amount_you_want_to_withdraw % int(key) == 0 and the_amount_you_want_to_withdraw != 0:
                         the_amount_you_want_to_withdraw -= int(key)
                         dct_znachen[key] = value - 1
