@@ -78,13 +78,23 @@ def menu_collector():
 
 def i_check_the_available_banknotes():
     #перевіряю доступні банкноти
-    print('перевіряю доступні банкноти')
-    pass
+    with open('number_of_banknotes.data') as bank:
+        result = bank.read()
+    dct_res = json.loads(result)
+    for key, value in dct_res.items():
+        print(key, '\t', value)
 
 def change_the_number_of_banknotes():
     #змінюю кількість банкнот
-    print('змінюю кількість банкнот')
-    pass
+    with open('number_of_banknotes.data') as bank:
+        result = bank.read()
+    dct_res = json.loads(result)
+    print('Enter the quantity of each banknote')
+    for key in dct_res:
+        dct_res[key] = int(input(f'{key} = '))
+
+    with open('number_of_banknotes.data', 'w') as bank:
+        bank.write(json.dumps(dct_res, indent=4))
 
 
 def menu():
@@ -125,25 +135,71 @@ def i_replenish_my_balance():
             number_of_tryings -= 1
             print(f'You have {number_of_tryings} more attempts to enter the top-up amount')
 
+def change_the_number_of_banknotes_in_the_ATM_after_the_user(summa, json_znachen):
+    #зменшую кількість банкнот в банкоматі коли користувач ЗНІМАЄ з балансу
+    the_amount_you_want_to_withdraw = int(summa)
+    with open(json_znachen) as bank:
+        res = bank.read()
+        dct_znachen = json.loads(res)
+    sum_bankomat = 0
+    sorted_tuple_znachen = sorted(dct_znachen.items(), key=lambda x: int(x[0]), reverse=True)
+    dct_znachen = dict(sorted_tuple_znachen)
+    for key, value in dct_znachen.items():
+        if value != 0:
+            sum_bankomat += int(key) * value
+    if sum_bankomat >= the_amount_you_want_to_withdraw:
+        while the_amount_you_want_to_withdraw >= 10:
+            for key, value in dct_znachen.items():
+                if value >= 1:
+                    while the_amount_you_want_to_withdraw > int(key):
+                        the_amount_you_want_to_withdraw -= int(key)
+                        dct_znachen[key] = value - 1
+                    if the_amount_you_want_to_withdraw % int(key) == 0 and the_amount_you_want_to_withdraw != 0:
+                        the_amount_you_want_to_withdraw -= int(key)
+                        dct_znachen[key] = value - 1
+            print('The removal from the balance was successful')
+        if the_amount_you_want_to_withdraw == 0:
+            with open(json_znachen, 'w') as bank:
+                bank.write(json.dumps(dct_znachen, indent=4))
+        else:
+            return 'Enter another amount to issue'
+    else:
+        return 'Enter a smaller amount to issue'
+    return True
+
 def i_take_off_the_bank_balance():
     #знімаю з балансу
     number_of_tryings = 3
     while number_of_tryings:
+        print('Such banknotes are now available')
+        with open('number_of_banknotes.data') as bank:
+            result = bank.read()
+        dct_res = json.loads(result)
+        for key in dct_res:
+            if dct_res[key] != 0:
+                print(key)
         the_amount_to_be_withdrawn = input('What amount do you want to deduct from the balance? ')
         if the_amount_to_be_withdrawn.isdigit() and int(the_amount_to_be_withdrawn) > 0:
             with open(f'{user}_balance.data') as b:
                 balance = b.read()
             result = int(balance) - int(the_amount_to_be_withdrawn)
             if result >= 0:
-                with open(f'{user}_balance.data', 'w') as b, open(f'{user}_transactions.data', 'a') as tr:
-                    b.write(str(result))
-                    tr.write(json.dumps(str(result)))
-                    tr.write('\n')
-                    return
+                if change_the_number_of_banknotes_in_the_ATM_after_the_user(the_amount_to_be_withdrawn, 'number_of_banknotes.data'):
+                    with open(f'{user}_balance.data', 'w') as b, open(f'{user}_transactions.data', 'a') as tr:
+                        b.write(str(result))
+                        tr.write(json.dumps(str(result)))
+                        tr.write('\n')
+                        return 'The removal from the balance was successful'
+                else:
+                    continue
             else:
                 print('Enter a smaller value')
                 number_of_tryings -= 1
                 print(f'{number_of_tryings} more attempts left')
+        else:
+            print('Enter a smaller value')
+            number_of_tryings -= 1
+            print(f'{number_of_tryings} more attempts left')
 
 def start():
     flag = whether_the_user_is_a_bank_customer()
