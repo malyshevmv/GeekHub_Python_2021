@@ -148,16 +148,28 @@ def change_the_number_of_banknotes_in_the_ATM_after_the_user(summa, json_znachen
         if value != 0:
             sum_bankomat += int(key) * value
     if sum_bankomat >= the_amount_you_want_to_withdraw:
+        dct_seized_banknotes = {}
         while the_amount_you_want_to_withdraw >= 10:
             for key, value in dct_znachen.items():
                 if value >= 1:
                     while the_amount_you_want_to_withdraw > int(key):
                         the_amount_you_want_to_withdraw -= int(key)
                         dct_znachen[key] = value - 1
+                        if key in dct_seized_banknotes:
+                            dct_seized_banknotes[key] += 1
+                        else:
+                            dct_seized_banknotes[key] = 1
                     if the_amount_you_want_to_withdraw % int(key) == 0 and the_amount_you_want_to_withdraw != 0:
                         the_amount_you_want_to_withdraw -= int(key)
                         dct_znachen[key] = value - 1
+                        if key in dct_seized_banknotes:
+                            dct_seized_banknotes[key] += 1
+                        else:
+                            dct_seized_banknotes[key] = 1
             print('The removal from the balance was successful')
+        print('Was withdrawn from the ATM')
+        for key, value in dct_seized_banknotes.items():
+            print(key, '\t', value)
         if the_amount_you_want_to_withdraw == 0:
             with open(json_znachen, 'w') as bank:
                 bank.write(json.dumps(dct_znachen, indent=4))
