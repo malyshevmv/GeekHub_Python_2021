@@ -150,26 +150,30 @@ def change_the_number_of_banknotes_in_the_ATM_after_the_user(summa, json_znachen
     if sum_bankomat >= the_amount_you_want_to_withdraw:
         dct_seized_banknotes = {}
         while the_amount_you_want_to_withdraw != 0:
+            has_the_amount_decreased = the_amount_you_want_to_withdraw
             for key, value in dct_znachen.items():
                 if value >= 1:
-                    if the_amount_you_want_to_withdraw % int(key) == 0 and the_amount_you_want_to_withdraw != 0:
+                    if the_amount_you_want_to_withdraw % int(key) == 0:
+                        print(key, 'pislja if')
                         the_amount_you_want_to_withdraw -= int(key)
                         dct_znachen[key] = value - 1
                         if key in dct_seized_banknotes:
                             dct_seized_banknotes[key] += 1
+                            break
                         else:
                             dct_seized_banknotes[key] = 1
-            print('The removal from the balance was successful')
+                            break
+            if the_amount_you_want_to_withdraw == has_the_amount_decreased:
+                print(the_amount_you_want_to_withdraw)
+                return False
         print('Was withdrawn from the ATM')
         for key, value in dct_seized_banknotes.items():
             print(key, '\t', value)
         if the_amount_you_want_to_withdraw == 0:
             with open(json_znachen, 'w') as bank:
                 bank.write(json.dumps(dct_znachen, indent=4))
-        else:
-            return 'Enter another amount to issue'
     else:
-        return 'Enter a smaller amount to issue'
+        return False
     return True
 
 def i_take_off_the_bank_balance():
@@ -196,7 +200,9 @@ def i_take_off_the_bank_balance():
                         tr.write('\n')
                         return 'The removal from the balance was successful'
                 else:
-                    continue
+                    print('Enter a smaller value')
+                    number_of_tryings -= 1
+                    print(f'{number_of_tryings} more attempts left')
             else:
                 print('Enter a smaller value')
                 number_of_tryings -= 1
