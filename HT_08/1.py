@@ -163,7 +163,6 @@ def change_the_number_of_banknotes_in_the_ATM_after_the_user(summa, json_znachen
                             dct_seized_banknotes[key] = 1
                             break
             if the_amount_you_want_to_withdraw == has_the_amount_decreased:
-                print(the_amount_you_want_to_withdraw)
                 return False
         print('Was withdrawn from the ATM')
         for key, value in dct_seized_banknotes.items():
