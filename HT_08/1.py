@@ -154,7 +154,6 @@ def change_the_number_of_banknotes_in_the_ATM_after_the_user(summa, json_znachen
             for key, value in dct_znachen.items():
                 if value >= 1:
                     if the_amount_you_want_to_withdraw % int(key) == 0:
-                        print(key, 'pislja if')
                         the_amount_you_want_to_withdraw -= int(key)
                         dct_znachen[key] = value - 1
                         if key in dct_seized_banknotes:
