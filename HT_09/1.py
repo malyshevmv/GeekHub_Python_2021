@@ -1,4 +1,3 @@
-import json
 import sqlite3 as sq
 
 
@@ -33,24 +32,26 @@ def menu_collector():
 
 def i_check_the_available_banknotes():
     #перевіряю доступні банкноти
-    with open('number_of_banknotes.data') as bank:
-        result = bank.read()
-    dct_res = json.loads(result)
+    with sq.connect('sqlite.db') as con:
+        cur = con.cursor()
+        cur.execute('''SELECT * FROM number_of_banknotes''')
+    dct_res = {i[0]: i[1] for i in list(cur)}
     for key, value in dct_res.items():
         print(key, '\t', value)
 
 def change_the_number_of_banknotes():
     #змінюю кількість банкнот
-    with open('number_of_banknotes.data') as bank:
-        result = bank.read()
-    dct_res = json.loads(result)
+    with sq.connect('sqlite.db') as con:
+        cur = con.cursor()
+        cur.execute('''SELECT * FROM number_of_banknotes''')
+    dct_res = {i[0]: i[1] for i in list(cur)}
     print('Enter the quantity of each banknote')
     for key in dct_res:
         dct_res[key] = int(input(f'{key} = '))
-
-    with open('number_of_banknotes.data', 'w') as bank:
-        bank.write(json.dumps(dct_res, indent=4))
-
+    with sq.connect('sqlite.db') as con:
+        cur = con.cursor()
+        for key, value in dct_res.items():
+            cur.execute(f'''UPDATE number_of_banknotes SET number = {value} WHERE banknote = {key}''')
 
 def menu():
     #пропоную користувачеві послуги банкомату
@@ -90,21 +91,33 @@ def i_replenish_my_balance():
             with sq.connect('sqlite.db') as con:
                 cur = con.cursor()
                 cur.execute(f'''UPDATE balanse SET amount = {result} WHERE user_id = {user_id}''')
+            with sq.connect('sqlite.db') as con:
+                cur = con.cursor()
+                cur.execute('''SELECT * FROM transactions''')
+                dct = {i[0]: i[1] for i in list(cur)}
+            transact = ''
+            for key in dct:
+                if key == user_id:
+                    transact += str(dct[key])
+            result_str = str(result)
+            transact += result_str
+            with sq.connect('sqlite.db') as con:
+                cur = con.cursor()
+                cur.execute(f'''UPDATE transactions SET user_transactions = ? WHERE user_id = ?''', (transact + ' ', user_id))
             return
         else:
             print('Did you really enter the amount you want to top up your balance?')
             number_of_tryings -= 1
             print(f'You have {number_of_tryings} more attempts to enter the top-up amount')
 
-def change_the_number_of_banknotes_in_the_ATM_after_the_user(summa, json_znachen):
+def change_the_number_of_banknotes_in_the_ATM_after_the_user(summa):
     #зменшую кількість банкнот в банкоматі коли користувач ЗНІМАЄ з балансу
     the_amount_you_want_to_withdraw = int(summa)
-    with open(json_znachen) as bank:
-        res = bank.read()
-        dct_znachen = json.loads(res)
+    with sq.connect('sqlite.db') as con:
+        cur = con.cursor()
+        cur.execute('''SELECT * FROM number_of_banknotes''')
+        dct_znachen = {i[0]: i[1] for i in list(cur)}
     sum_bankomat = 0
-    sorted_tuple_znachen = sorted(dct_znachen.items(), key=lambda x: int(x[0]), reverse=True)
-    dct_znachen = dict(sorted_tuple_znachen)
     for key, value in dct_znachen.items():
         if value != 0:
             sum_bankomat += int(key) * value
@@ -129,8 +142,10 @@ def change_the_number_of_banknotes_in_the_ATM_after_the_user(summa, json_znachen
         for key, value in dct_seized_banknotes.items():
             print(key, '\t', value)
         if the_amount_you_want_to_withdraw == 0:
-            with open(json_znachen, 'w') as bank:
-                bank.write(json.dumps(dct_znachen, indent=4))
+            with sq.connect('sqlite.db') as con:
+                cur = con.cursor()
+                for key, value in dct_znachen.items():
+                    cur.execute(f'''UPDATE number_of_banknotes SET number = {value} WHERE banknote = {key}''')
     else:
         return False
     return True
@@ -140,9 +155,10 @@ def i_take_off_the_bank_balance():
     number_of_tryings = 3
     while number_of_tryings:
         print('Such banknotes are now available')
-        with open('number_of_banknotes.data') as bank:
-            result = bank.read()
-        dct_res = json.loads(result)
+        with sq.connect('sqlite.db') as con:
+            cur = con.cursor()
+            cur.execute('''SELECT * FROM number_of_banknotes''')
+            dct_res = {i[0]: i[1] for i in list(cur)}
         for key in dct_res:
             if dct_res[key] != 0:
                 print(key)
@@ -156,11 +172,25 @@ def i_take_off_the_bank_balance():
                         balance = result[1]
             result = balance - int(the_amount_to_be_withdrawn)
             if result >= 0:
-                if change_the_number_of_banknotes_in_the_ATM_after_the_user(the_amount_to_be_withdrawn, 'number_of_banknotes.data'):
+                if change_the_number_of_banknotes_in_the_ATM_after_the_user(the_amount_to_be_withdrawn):
                     with sq.connect('sqlite.db') as con:
                         cur = con.cursor()
                         cur.execute(f'''UPDATE balanse SET amount = {result} WHERE user_id = {user_id}''')
-                        return 'The removal from the balance was successful'
+                    with sq.connect('sqlite.db') as con:
+                        cur = con.cursor()
+                        cur.execute('''SELECT * FROM transactions''')
+                        dct = {i[0]: i[1] for i in list(cur)}
+                    transact = ''
+                    for key in dct:
+                        if key == user_id:
+                            transact += str(dct[key])
+                    result_str = str(result)
+                    transact += result_str
+                    with sq.connect('sqlite.db') as con:
+                        cur = con.cursor()
+                        cur.execute(f'''UPDATE transactions SET user_transactions = ? WHERE user_id = ?''',
+                                    (transact + ' ', user_id))
+                    return 'The removal from the balance was successful'
                 else:
                     print('Enter a smaller value')
                     number_of_tryings -= 1
