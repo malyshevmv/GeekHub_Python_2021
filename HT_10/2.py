@@ -19,9 +19,9 @@ import datetime
 import time
 
 # вводим дані валюту та дату
-currency = input('Enter currency(example: USD, EUR): ')
+currency = input('Enter currency(example: USD, EUR, GBP, PLN): ')
 #currency = 'USD'
-lst_of_currencies = ['USD', 'EUR']
+lst_of_currencies = ['USD', 'EUR', 'GBP', 'PLN']
 if currency not in lst_of_currencies:
     print('Entered an incorrect value')
 start_date = input('Enter the start date(example: 19.12.2021): ')
@@ -57,6 +57,10 @@ for date_ in lst_date:
         dct_data[date_] = dct['exchangeRate'][-2]['saleRateNB']
     elif currency == 'EUR':
         dct_data[date_] = dct['exchangeRate'][8]['saleRateNB']
+    elif currency == 'GBP':
+        dct_data[date_] = dct['exchangeRate'][9]['saleRateNB']
+    elif currency == 'PLN':
+        dct_data[date_] = dct['exchangeRate'][17]['saleRateNB']
 
 # список з різницямми курсу
 lst_values = list(dct_data.values())
