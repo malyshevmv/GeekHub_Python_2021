@@ -16,43 +16,45 @@
 import requests
 import time
 import pprint
-# users = 'https://jsonplaceholder.typicode.com/users'
-# r = requests.get(users)
-# data_users = r.json()
+import random
+users = 'https://jsonplaceholder.typicode.com/users'
+r = requests.get(users)
+data_users = r.json()
 #
-# posts = 'https://jsonplaceholder.typicode.com/posts'
-# r = requests.get(users)
-# data_posts = r.json()
+posts = 'https://jsonplaceholder.typicode.com/posts'
+r = requests.get(posts)
+data_posts = r.json()
 #
 # comments = 'https://jsonplaceholder.typicode.com/comments'
 # r = requests.get(users)
 # data_comments = r.json()
 #
-# todos = 'https://jsonplaceholder.typicode.com/todos'
-# r = requests.get(users)
-# data_todos = r.json()
+todos = 'https://jsonplaceholder.typicode.com/todos'
+r = requests.get(todos)
+data_todos = r.json()
 #
-# photos = 'https://jsonplaceholder.typicode.com/photos'
-# r = requests.get(users)
-# data_photos = r.json()
+photos = 'https://jsonplaceholder.typicode.com/photos'
+r = requests.get(photos)
+data_photos = r.json()
 
 
 def i_return_brief_information_about_users():
-    global data_users
-    users = 'https://jsonplaceholder.typicode.com/users'
-    r = requests.get(users)
-    data_users = r.json()
+    '''інформація про користувачів'''
+    global lst_user_id
+    lst_user_id = []
     print('User information')
     for user in data_users:
         print('id:', user['id'])
         print('name:', user['name'])
         print('username:', user['username'])
         print('-' * 20)
-        #time.sleep(0.75)
-
+        time.sleep(0.75)
+        lst_user_id.append(user['id'])
 def i_choose_the_user():
     print('Select user')
     id_user = int(input('Enter id: '))
+    if id_user < 1 or id_user > 10:
+        return 'Error'
     return id_user
 
 def complete_user_information(id: int):
@@ -66,27 +68,103 @@ def complete_user_information(id: int):
                         print('\t', key + ':', value_)
                 else:
                     print(key + ':', value)
-            return user
+    return menu(id)
+
+def list_of_user_posts(id):
+    '''інформація про  пости користувача'''
+    global data_posts
+    posts = 'https://jsonplaceholder.typicode.com/posts'
+    r = requests.get(posts)
+    data_posts = r.json()
+    print('List of user posts')
+    for post in data_posts:
+        if post['userId'] == id:
+            print('id:', post['id'])
+            print(post['title'])
+            print('-' * 20)
+            time.sleep(0.75)
+
+def rec_comments(id_post):
+    '''шатаєм коментарі'''
+    comments = 'https://jsonplaceholder.typicode.com/comments'
+    r = requests.get(comments)
+    data_comments = r.json()
+    counter = 0
+    for comment in data_comments:
+        if comment['postId'] == id_post:
+            counter += 1
+            print('id:',comment['id'], end='  ')
+    print(f'Number of comments: {counter}')
+
+def information_about_a_particular_post(id):
+    '''інформація про конкретний пост'''
+    id_post = int(input('Enter id post: '))
+    for post in data_posts:
+        if post['userId'] == id and post['id'] == id_post:
+            print('id:', post['id'])
+            print('title:', post['title'])
+            print('body:', post['body'])
+            rec_comments(id_post)
+
+def menu_posts(id: int):
+    '''проситиме ввести два значення для вибору переліку постів користувача або інформація про конкретний пост'''
+    print('''
+        Select 1 to see a list of user posts
+        Select 2 to see information about a specific post
+    ''')
+    user_choice_posts = int(input('Your choice: '))
+    if user_choice_posts == 1:
+        list_of_user_posts(id)
+    elif user_choice_posts == 2:
+        information_about_a_particular_post(id)
+    else:
+        print('Invalid value entered')
+    return menu(id)
+def menu_todos(id):
+    print('''
+        Select 1 to see a list of completed tasks
+        Select 2 to see a list of failed tasks
+    ''')
+    flaq = int(input('Your choice: '))
+    if flaq == 1:
+        for i in data_todos:
+            if i['userId'] == id and i['completed'] == True:
+                print(i['title'])
+    elif flaq == 2:
+        for i in data_todos:
+            if i['userId'] == id and i['completed'] == False:
+                print(i['title'])
+    return menu(id)
+def random_url_pic():
+    ran_num = random.randint(1, 5000)
+    for i in data_photos:
+        if i['id'] == ran_num:
+            print(i['url'])
 
 def menu(id: int):
-    '''
-    print('ведіть що тре по юзеру зробить
-    1  -повна інфа по користувачю
-    2 пости
-        введіть 1 щоб - перелік постів користувача (ID та заголовок)
-        введіть 2 щоб - інформація про конкретний пост (ID, заголовок, текст, кількість коментарів + перелік їхніх ID)
-        тут, або між ними тре вернутись в головне меню типу: "що робити далі з юзером"
-    3 туду це список завдань по юзеру
-        введіть 1 щоб список невиконаних задач
-        введіть 2 щоб побачити список виконаних задач
-        тут теж тре вертатись в головне меню
-    4 принтуєм рандомну картинку
-    '''
-    complete_user_information(id)
+    print('''
+        Select 1 to view complete user information
+        Select 2 to go to the user's posts
+        Select 3 to go to user tasks
+        Select 4 to get the random picture URL
+    ''')
+    user_choice = int(input('Your choice: '))
+    if user_choice == 1:
+        complete_user_information(id)
+    elif user_choice == 2:
+        menu_posts(id)
+    elif user_choice == 3:
+        menu_todos(id)
+    elif user_choice == 4:
+        random_url_pic()
+    return 'Your choice is not correct'
 
 def start():
     i_return_brief_information_about_users()
     id_user = i_choose_the_user()
-    menu(id_user) # МЕНЮ ТРЕБА ЗАЦИКЛИТЬ АБО КОЖНОГО РАЗУ ВЕРТАТИСЬ ДО АЙДІ ЮЗЕРА ЩО НЕ ОК
+    if id_user == 'Error':
+        print('Your choice is not correct!!')
+        return
+    menu(id_user)
 
 start()
