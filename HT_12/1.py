@@ -8,6 +8,8 @@
 import requests
 from bs4 import BeautifulSoup
 import pprint
+import csv
+import sqlite3 as sq
 url = 'http://quotes.toscrape.com'
 r = requests.get(url)
 soup = BeautifulSoup(r.text, 'lxml')
@@ -17,8 +19,6 @@ lst_page_text = soup.select('span.text')
 lst_page_author = soup.select('small.author')
 dct_quote = {}
 for txt, author in zip(lst_page_text, lst_page_author):
-    print(txt.text)
-    print(author.text)
     if author.text not in dct_quote:
         dct_quote[author.text] = [txt.text]
     else:
@@ -79,4 +79,27 @@ for link in lst_link_aut:
     if name not in author_information:
         author_information[name] = des
 
-pprint.pprint(author_information)
+with open('author_and_quote.csv', 'w', encoding='utf-8') as f:  # Just use 'w' mode in 3.x
+    w = csv.writer(f)
+    w.writerow(('author', 'quote'))
+    for k, v in dct_quote.items():
+        w.writerow((k, v))
+
+with open('description_of_the_author.csv', 'w', encoding='utf-8') as f:  # Just use 'w' mode in 3.x
+    w = csv.writer(f)
+    w.writerow(('author', 'description'))
+    for k, v in author_information.items():
+        w.writerow((k, v))
+
+with sq.connect('quotes_to_scrape.db') as con:
+    cur = con.cursor()
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS quotes (
+        name TEXT NOT NULL,
+        quote TEXT NOT NULL,
+        description TEXT NOT NULL
+        )''')
+    for k_dct, k_author in zip(sorted(dct_quote), sorted(author_information)):
+        cur.execute(f'''INSERT INTO quotes (name, quote, description)
+            VALUES (?, ?, ?)
+            ''', (k_dct, str(dct_quote[k_dct]), author_information[k_author]))
