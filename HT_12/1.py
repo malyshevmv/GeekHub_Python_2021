@@ -1,37 +1,52 @@
-'''
+"""
 1. http://quotes.toscrape.com/ - написати скрейпер для збору всієї доступної інформації про записи:
-   цитата, автор, інфа про автора... Отриману інформацію зберегти в CSV файл та в базу. Результати зберегти в репозиторії.
-   Пагінацію по сторінкам робити динамічною (знаходите лінку на наступну сторінку і берете з неї URL). Хто захардкодить
-   пагінацію зміною номеру сторінки в УРЛі - буде наказаний ;)
-'''
+   цитата, автор, інфа про автора... Отриману інформацію зберегти в CSV файл та в базу.
+   Результати зберегти в репозиторії.
+   Пагінацію по сторінкам робити динамічною (знаходите лінку на наступну сторінку і берете з неї URL).
+   Хто захардкодить пагінацію зміною номеру сторінки в УРЛі - буде наказаний ;)
+"""
 
 import requests
 from bs4 import BeautifulSoup
-import pprint
 import csv
 import sqlite3 as sq
+import pprint
+
 url = 'http://quotes.toscrape.com'
 r = requests.get(url)
 soup = BeautifulSoup(r.text, 'lxml')
 
-#===========на сторінці находим цитати та їх авторів і додаємо в словник===========
-lst_page_text = soup.select('span.text')
-lst_page_author = soup.select('small.author')
-dct_quote = {}
-for txt, author in zip(lst_page_text, lst_page_author):
-    if author.text not in dct_quote:
-        dct_quote[author.text] = [txt.text]
-    else:
-        dct_quote[author.text].append(txt.text)
+def search_for_quotes(u):
+    r = requests.get(u)
+    soup = BeautifulSoup(r.text, 'lxml')
+    lst_quotes = soup.select('span.text')
+    return lst_quotes
 
-#шукаємо юрл на автора для інфи про нього
+def search_for_authors(u):
+    r = requests.get(u)
+    soup = BeautifulSoup(r.text, 'lxml')
+    lst_author = soup.select('small.author')
+    return lst_author
+
+def search_for_tags(u):
+    r = requests.get(u)
+    soup = BeautifulSoup(r.text, 'lxml')
+    lst = soup.find_all('div', class_='tags')
+    lst_tags = []
+    for i in lst:
+        lst_tags.append(i.text[32:])
+    return lst_tags
+data = {}
+for quote, author, tag in zip(search_for_quotes(url), search_for_authors(url), search_for_tags(url)):
+    data[quote.text] = {author.text: tag}
+
 div = soup.find_all('div', class_='col-md-8')[1]
 lst_author = div.select('a[href*="/author/"]')
 lst_link_aut = []
 for i in lst_author:
-    lst_link_aut.append(i.attrs['href'])
+    if i.attrs['href'] not in lst_link_aut:
+        lst_link_aut.append(i.attrs['href'])
 
-#шукаємо як перейти на наступну сторінку
 lst_next_page = soup.select('a[href*="/page/"]')
 for i in lst_next_page:
     if 'Next' in i.text:
@@ -39,34 +54,23 @@ for i in lst_next_page:
 url_ = url + next_page
 last_url = ''
 
-#переходимо по всих сторінка сайту і отримаємо ВСІ цитати ВСИХ авторів
 while url_ != last_url:
     r = requests.get(url_)
     soup = BeautifulSoup(r.text, 'lxml')
-    #на всих сторінках сайту тре найти посилання на авторів
+    # на всих сторінках сайту тре найти посилання на авторів
     div = soup.find_all('div', class_='col-md-8')[1]
     lst_author = div.select('a[href*="/author/"]')
     for i in lst_author:
-        lst_link_aut.append(i.attrs['href'])
-    #===========на сторінці находим цитати та їх авторів і додаємо в словник===========
-    lst_page_text = soup.select('span.text')
-    lst_page_author = soup.select('small.author')
-    for txt, author in zip(lst_page_text, lst_page_author):
-        if author.text not in dct_quote:
-            dct_quote[author.text] = [txt.text]
-        else:
-            dct_quote[author.text].append(txt.text)
-    #=================================
-    # шкукаємо як перейти на наступну сторінку
-    #print(soup.select('a[href*="/page/"]'))
+        if i.attrs['href'] not in lst_link_aut:
+            lst_link_aut.append(i.attrs['href'])
+    for quote, author, tag in zip(search_for_quotes(url_), search_for_authors(url_), search_for_tags(url_)):
+        data[quote.text] = {author.text: tag}
     lst_next_page = soup.select('a[href*="/page/"]')
     for i in lst_next_page:
         if 'Next' in i.text:
             next_page = i.attrs['href']
     last_url, url_ = url_, url + next_page
 
-#шукаємо інфу по автору
-lst_link_aut = set(lst_link_aut)
 author_information = {}
 for link in lst_link_aut:
     url = 'http://quotes.toscrape.com'
@@ -79,13 +83,15 @@ for link in lst_link_aut:
     if name not in author_information:
         author_information[name] = des
 
-with open('author_and_quote.csv', 'w', encoding='utf-8') as f:  # Just use 'w' mode in 3.x
-    w = csv.writer(f)
-    w.writerow(('author', 'quote'))
-    for k, v in dct_quote.items():
-        w.writerow((k, v))
 
-with open('description_of_the_author.csv', 'w', encoding='utf-8') as f:  # Just use 'w' mode in 3.x
+with open('author_and_quote.csv', 'w', encoding='utf-8') as f:
+    w = csv.writer(f)
+    w.writerow(('quote', 'author', 'tags'))
+    for k, v, in data.items():
+        for k_v, v_v in v.items():
+            w.writerow((k, k_v, v_v))
+
+with open('description_of_the_author.csv', 'w', encoding='utf-8') as f:
     w = csv.writer(f)
     w.writerow(('author', 'description'))
     for k, v in author_information.items():
@@ -96,10 +102,18 @@ with sq.connect('quotes_to_scrape.db') as con:
 
     cur.execute('''CREATE TABLE IF NOT EXISTS quotes (
         name TEXT NOT NULL,
-        quote TEXT NOT NULL,
+        quote TEXT NOT NULL
+        )''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS author_information (
+        name TEXT NOT NULL,
         description TEXT NOT NULL
         )''')
-    for k_dct, k_author in zip(sorted(dct_quote), sorted(author_information)):
-        cur.execute(f'''INSERT INTO quotes (name, quote, description)
-            VALUES (?, ?, ?)
-            ''', (k_dct, str(dct_quote[k_dct]), author_information[k_author]))
+    for k, v in data.items():
+        for k_v, v_v in v.items():
+            cur.execute('''INSERT INTO quotes (name, quote)
+            VALUES (?, ?)
+            ''', (k_v, k))
+    for k, v in author_information.items():
+        cur.execute('''INSERT INTO author_information (name, description)
+            VALUES (?, ?)
+            ''', (k, v))
