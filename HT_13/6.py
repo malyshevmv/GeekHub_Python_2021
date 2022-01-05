@@ -7,7 +7,7 @@ class Counter(object):
     counter = 0
 
     def __init__(self):
-        self.__class__.counter += 1
+        Counter.counter += 1
 
 
 a = Counter()
