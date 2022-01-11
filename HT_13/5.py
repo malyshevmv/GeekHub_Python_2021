@@ -1,77 +1,80 @@
 """
-5. Створіть за допомогою класів та продемонструйте свою реалізацію шкільної бібліотеки(включіть фантазію).
+5. Створіть за допомогою класів та продемонструйте свою реалізацію шкільної бібліотеки(включіть фантазію)
 """
 
 
 class SchoolLibrary(object):
-    number_of_books = 0
-    number_of_students = 0
-    book = []
-    students = []
+    def __init__(self, list_of_books):
+        self.list_of_books = list_of_books
 
-    def __init__(self, name, title=None, year_of_publication=None, short_description=None):
-        self.name = name
-        self.title = title
-        self.year_of_publication = year_of_publication
-        self.short_description = short_description
-        if title is not None:
-            SchoolLibrary.number_of_books += 1
-            self.book.append([self.name, self.title])
+    def print_list(self):
+        for book in self.list_of_books:
+            print(book)
+
+    def gives_the_book(self, book):
+        if book in self.list_of_books:
+            self.list_of_books.remove(book)
+            print(f'You got the book {book} do not forget to return it')
         else:
-            SchoolLibrary.number_of_students += 1
-            self.students.append(self.name)
+            print('The book is not in the library')
 
-    def information(self):
-        for k, v in self.__dict__.items():
-            if v is not None:
-                print(k, v)
+    def add_a_book(self, book):
+        self.list_of_books.append(book)
+        print('Thank you for returning the book')
 
-
-a = SchoolLibrary(
-    'Swaroop Chitlur',
-    'A Byte of Python',
-    2012,
-    '"A Byte of Python" is a free book on programming using the Python language',
-)
-a1 = SchoolLibrary(
-    'Mark Lutz',
-    'Learning Python',
-    2019,
-    'The first volume of the fifth edition of the legendary book "Learn Python"',
-)
-b = SchoolLibrary('school student')
-b1 = SchoolLibrary('school student1')
-b2 = SchoolLibrary('school student2')
+    def __len__(self):
+        return len(self.list_of_books)
 
 
-# b.information()
+class Student(object):
+    def __init__(self, name):
+        self.name = name
+        self.number_of_books = []
+
+    def to_take_the_book(self):
+        self.book = input('Enter book: ')
+        self.number_of_books.append(self.book)
+        return self.book
+
+    def return_the_book(self):
+        self.book = input('Enter book: ')
+        self.number_of_books.remove(self.book)
+        return self.book
+
+    def print_lst(self):
+        if self.number_of_books:
+            for book in self.number_of_books:
+                print(book)
+        else:
+            print('Your book list is empty')
 
 
-def available_books():
-    for name, title in SchoolLibrary.book:
-        print(name, '-', title)
+def menu():
+    lib = SchoolLibrary(['book1', 'book2', 'book3'])
+    st = Student('student1')
+    print('\t', 'Welcome to the school library!')
+    while True:
+
+        print(f'''
+The school library has {len(lib)} books
+        
+To view which books are in the library, enter 1
+To get a book, enter 2
+To return a book, enter 3
+To view a list of books you have, enter 4
+To exit, enter 5
+    ''')
+        choice = int(input('Your choice: '))
+        if choice == 1:
+            SchoolLibrary.print_list(lib)
+        elif choice == 2:
+            lib.gives_the_book(st.to_take_the_book())
+        elif choice == 3:
+            lib.add_a_book(st.return_the_book())
+        elif choice == 4:
+            st.print_lst()
+        elif choice == 5:
+            return
 
 
-def library_students():
-    for name in SchoolLibrary.students:
-        print(name)
-
-
-def School_lib():
-    """Displays basic information about the library"""
-    print('School library')
-    print(
-        f'''The number of books in the library is {SchoolLibrary.number_of_books} books
-Number of library users {SchoolLibrary.number_of_students}
--------------------------------------
-To view available books, enter 1
-List of library visitors, enter 2
-        ''')
-    choice = input('Your choice: ')
-    if choice == '1':
-        available_books()
-    elif choice == '2':
-        library_students()
-
-
-School_lib()
+menu()

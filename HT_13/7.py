@@ -11,4 +11,4 @@ class Thing(object):
 example = Thing()
 
 print(type(example))
-print(Thing())
+print(type(Thing))
