@@ -1,8 +1,10 @@
-import requests
+import sys
 import csv
 
+import requests
 
-def scraper(category='newstories'):
+
+def scraper(category):
     """ Функція-генератор приймає категорію статей
     робе реквест по категорії, зберігаючи список id статей
     потім через цикл for робим реквест до конкретної статті
@@ -16,19 +18,25 @@ def scraper(category='newstories'):
     lst_id_stories = id_stories.json()
 
     for id_stories in lst_id_stories:
-        url_stories = f'https://hacker-news.firebaseio.com/v0/item/{id_stories}.json?print=pretty'
-        r = requests.get(url_stories)
+        url_api = 'https://hacker-news.firebaseio.com/v0/item/'
+        url_stories = f'{id_stories}.json?print=pretty'
+        r = requests.get(url_api + url_stories)
         res = r.json()
         yield res
 
 
-input_category = input('Enter category: ')
+try:
+    input_category = sys.argv[1]
+except IndexError:
+    input_category = 'newstories'
+
 for stories in scraper(input_category):
-    with open(f'{input_category}.csv', 'a', encoding='utf-8') as f:
+    with open(f'{input_category}.csv', 'a', encoding='utf-8', newline='') as f:
         writer = csv.writer(f, delimiter=':')
-        if type(stories) == dict():
+        if isinstance(stories, dict):
             for key, value in stories.items():
                 writer.writerow([key, value])
         else:
             print('The selected category does not exist')
             break
+        writer.writerow('=========================')
