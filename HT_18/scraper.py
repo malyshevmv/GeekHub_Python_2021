@@ -30,13 +30,20 @@ try:
 except IndexError:
     input_category = 'newstories'
 
+counter = 0
 for stories in scraper(input_category):
-    with open(f'{input_category}.csv', 'a', encoding='utf-8', newline='') as f:
-        writer = csv.writer(f, delimiter=':')
-        if isinstance(stories, dict):
-            for key, value in stories.items():
-                writer.writerow([key, value])
-        else:
-            print('The selected category does not exist')
-            break
-        writer.writerow('=========================')
+    if isinstance(stories, dict):
+        with open(
+                f'{input_category}.csv',
+                'a',
+                encoding='utf-8',
+                newline=''
+                ) as f:
+            writer = csv.DictWriter(f, fieldnames=stories)
+            if counter == 0:
+                writer.writeheader()
+                counter += 1
+            writer.writerow(stories)
+    else:
+        print('The selected category does not exist')
+        break
