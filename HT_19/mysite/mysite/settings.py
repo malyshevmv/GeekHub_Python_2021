@@ -11,15 +11,21 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
-from .local_settings import *
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+try:
+    from .local_settings import *
+except IndexError:
+    SECRET_KEY = 'django-insecure-o0jw4g$_8x-2+sa!74sb=fk-4iw12(ac-@cj0=j2$v^^j96bpu'
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
-
-
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': Path(__file__).resolve().parent.parent / 'db.sqlite3',
+        }
+    }
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
