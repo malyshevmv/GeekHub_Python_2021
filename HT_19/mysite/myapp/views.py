@@ -12,13 +12,39 @@ def scraper(category):
     url = f'https://hacker-news.firebaseio.com/v0/{category}.json?print=pretty'
     id_stories = req.get(url)
     lst_id_stories = id_stories.json()
-
     for id_stories in lst_id_stories:
-        url_api = 'https://hacker-news.firebaseio.com/v0/item/'
-        url_stories = f'{id_stories}.json?print=pretty'
-        r = req.get(url_api + url_stories)
-        res = r.json()
-        yield res
+        if category == 'askstories':
+            id_ask = Ask.objects.in_bulk()
+            if id_stories not in id_ask:
+                url_api = 'https://hacker-news.firebaseio.com/v0/item/'
+                url_stories = f'{id_stories}.json?print=pretty'
+                r = req.get(url_api + url_stories)
+                res = r.json()
+                yield res
+        elif category == 'showstories':
+            id_show = Show.objects.in_bulk()
+            if id_stories not in id_show:
+                url_api = 'https://hacker-news.firebaseio.com/v0/item/'
+                url_stories = f'{id_stories}.json?print=pretty'
+                r = req.get(url_api + url_stories)
+                res = r.json()
+                yield res
+        elif category == 'newstories':
+            id_new = New.objects.in_bulk()
+            if id_stories not in id_new:
+                url_api = 'https://hacker-news.firebaseio.com/v0/item/'
+                url_stories = f'{id_stories}.json?print=pretty'
+                r = req.get(url_api + url_stories)
+                res = r.json()
+                yield res
+        elif category == 'jobstories':
+            id_job = Job.objects.in_bulk()
+            if id_stories not in id_job:
+                url_api = 'https://hacker-news.firebaseio.com/v0/item/'
+                url_stories = f'{id_stories}.json?print=pretty'
+                r = req.get(url_api + url_stories)
+                res = r.json()
+                yield res
 
 
 def index(request):
@@ -68,12 +94,12 @@ def index(request):
             for stories in scraper('newstories'):
                 created = New.objects.get_or_create(
                     by=stories['by'],
-                    descendants=stories['descendants'],
+                    descendants=stories['descendants'] if 'descendants' in stories.keys() else None,
                     id=stories['id'],
                     kids=str(stories['kids']) if 'kids' in stories.keys() else None,
                     score=stories['score'],
                     time=stories['time'],
-                    title=stories['title'],
+                    title=stories['title'] if 'title' in stories.keys() else None,
                     _type=stories['type'],
                     url=stories['url'] if 'url' in stories.keys() else None
                 )

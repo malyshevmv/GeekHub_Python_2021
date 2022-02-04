@@ -11,6 +11,7 @@ class Ask(models.Model):
     time = models.IntegerField(default=None)
     title = models.CharField(name='title', max_length=50)
     _type = models.TextField(max_length=250, default=None)
+    objects = models.Manager()
 
     def __str__(self):
         return self.by
@@ -24,6 +25,7 @@ class Job(models.Model):
     title = models.CharField(name='title', max_length=50)
     _type = models.TextField(max_length=250, default=None, null=True)
     url = models.URLField(default=None, null=True)
+    objects = models.Manager()
 
     def __str__(self):
         return self.by
@@ -40,6 +42,7 @@ class Show(models.Model):
     title = models.CharField(name='title', max_length=50)
     _type = models.TextField(max_length=250, default=None, null=True)
     url = models.URLField(default=None, null=True)
+    objects = models.Manager()
 
     def __str__(self):
         return self.by
@@ -47,14 +50,15 @@ class Show(models.Model):
 
 class New(models.Model):
     by = models.CharField('by', max_length=50, default='NAME_NEW')
-    descendants = models.IntegerField(default=0)
+    descendants = models.IntegerField(default=0, null=True)
     id = models.IntegerField(primary_key=True)
     kids = models.TextField(max_length=250, default='kids', null=True)
     score = models.IntegerField(default=0)
     time = models.IntegerField(default=0)
-    title = models.CharField(name='title', max_length=50)
+    title = models.CharField(name='title', max_length=50, default=None, null=True)
     _type = models.TextField(max_length=250, default='TYPE', null=True)
     url = models.URLField(default=None, null=True)
+    objects = models.Manager()
 
     def __str__(self):
         return self.by
