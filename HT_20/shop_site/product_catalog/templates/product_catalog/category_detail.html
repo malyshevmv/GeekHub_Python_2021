@@ -1,0 +1,15 @@
+{% extends "product_catalog/base.html" %}
+
+{% block content %}
+
+<h1>Name category: {{ category.name }}</h1>
+<p>{{ category.all }}</p>
+{% for prod in lst %}
+    {% if prod.category_id == pk %}
+        {% if prod.category_id == category.id %}
+            <p>{{ product.name }}</p>
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+{% endblock %}

@@ -2,9 +2,29 @@
 
 {% block title %}Home{% endblock %}
 {% block content %}
+
+
+    <header class="d-flex justify-content-center py-3">
+      <ul class="nav nav-pills">
+          {% for cat in lst_cat %}
+            <li class="nav-item"><a href="category/{{ cat.id }}" class="nav-link">{{ cat.name }}</a></li>
+          {% endfor %}
+      </ul>
+    </header>
+
 <ul>
     <strong>Number of products</strong> {{ num_product }}
-
+    <p>
+        {% if lst %}
+        {% for prod in lst %}
+            <a href="product/{{ prod.id }}">
+                {{ prod.name }}
+            </a><br>
+        {% endfor %}
+    {% else %}
+        <p>db not product</p>
+    {% endif %}
+    </p>
 </ul>
 
 <р> number of visits {{ num_visits }}</р>
